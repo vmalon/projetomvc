@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using WebApplication7.Models;
 using WebApplication7.Data;
+using WebApplication7.Services;
 
 namespace WebApplication7
 {
@@ -41,6 +42,7 @@ namespace WebApplication7
             builder.MigrationsAssembly("WebApplication7")));
 
             services.AddScoped<SeedingService>();
+            services.AddScoped<SellerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
