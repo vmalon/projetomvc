@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication7.Models;
 using WebApplication7.Services;
 
 namespace WebApplication7.Controllers
@@ -24,5 +25,27 @@ namespace WebApplication7.Controllers
 
             return View(list);
         }
+
+        //Por padrão, criar GET
+        //Altera POST
+        
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Seller seller)
+        {
+            _sellerService.Insert(seller);
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
+
+
     }
 }
