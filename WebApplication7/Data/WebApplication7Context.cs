@@ -14,8 +14,8 @@ namespace WebApplication7.Models
         }
 
         public DbSet<Departments> Departments { get; set; }
-        public DbSet<Departments> Seller { get; set; }
-        public DbSet<Departments> SalesRecord { get; set; }
+        public DbSet<Seller> Seller { get; set; }
+        public DbSet<SalesRecord> SalesRecord { get; set; }
 
     }
 }
