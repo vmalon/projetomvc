@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +59,7 @@ namespace WebApplication7.Controllers
             //Verifica se o id e o obj é nulo e retorna NotFound()
             if (id == null && obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado"});
             }
 
             //Retorna a View Delete, passando o objeto obj como parâmetro
@@ -81,7 +82,7 @@ namespace WebApplication7.Controllers
             //Verifica se o id e o obj é nulo e retorna NotFound()
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não foi fornecido" });
             }
 
             //obj recebe o id, retornado do método FindById, do serviço _sellerSerice
@@ -89,7 +90,7 @@ namespace WebApplication7.Controllers
 
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
 
             //Retorna a View Delete, passando o objeto obj como parâmetro
@@ -113,13 +114,9 @@ namespace WebApplication7.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (NotFoundException)
+            catch (ApplicationException e)
             {
-                return NotFound();
-            }
-            catch (DbConcurrencyException)
-            {
-                return BadRequest();
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
         }
 
@@ -131,14 +128,15 @@ namespace WebApplication7.Controllers
             //Verifica se o id e o obj é nulo e retorna NotFound()
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não foi fornecido" });
+
             }
 
             var obj = _sellerService.FindById(id.Value);
 
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não foi encontrado" });
             }
 
             List<Departments> departments = _departmentService.FindAll();
@@ -148,5 +146,15 @@ namespace WebApplication7.Controllers
 
         }
 
+        public IActionResult Error(string Message)
+        {
+            var viewModel = new ErrorViewModel
+            {
+                Message = Message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+
+            return View(viewModel);
+        }
     }
 }
