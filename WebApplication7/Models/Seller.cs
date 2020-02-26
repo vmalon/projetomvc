@@ -8,12 +8,22 @@ namespace WebApplication7.Models
     public class Seller
     {
         public int Id { get; set; }
+        [Display(Name = "Nome")]
         public string Nme { get; set; }
+        [Display(Name = "Email")]
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
+        [Display(Name = "Data de Aniversário")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString ="{0:dd/MM/yyyy}")]
         public DateTime BirthDate { get; set; }
+        [Display(Name = "Salário")]
+        [DisplayFormat(DataFormatString = "{0:F2}")]
         public double BaseSalary { get; set; }
+        [Display(Name = "Departamento")]
         public Departments Department { get; set; }
         public int DepartmentId { get; set;}
+        [Display(Name = "Vendas")]
         public ICollection<SalesRecord> Sales { get; set; } = new List<SalesRecord>();
 
         public Seller()
