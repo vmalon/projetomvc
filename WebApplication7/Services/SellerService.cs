@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApplication7.Models;
 using Microsoft.EntityFrameworkCore;
+using WebApplication7.Services.Exceptions;
 
 namespace WebApplication7.Services
 {
@@ -38,6 +39,7 @@ namespace WebApplication7.Services
 
         public Seller FindById(int id)
         {
+            //Join das duas tabelas com Entity Framework Core
             return _context.Seller.Include(x => x.Department).FirstOrDefault(x => x.Id == id);
         }
 
@@ -48,6 +50,26 @@ namespace WebApplication7.Services
             _context.SaveChanges();
         }
 
-
+        public void Update(Seller obj)
+        {
+            //Any: se existe algum registro com a condição
+            //Se não existir um registro igual ao do objeto
+            if (!_context.Seller.Any(x => x.Id == obj.Id))
+            {
+                throw new NotFoundException("Id não encontrado");
+            }
+            try
+            {
+                _context.Update(obj);
+                _context.SaveChanges();
+            }
+            //A camada de serviço lança a Exceção no seu nível
+            //Assim, o controller consegue reconhecer a exceção fora da sua camada
+            //Essas exceções de Serviço, são exceções de camada de nível de acesso a dados
+            catch (DbConcurrencyException e)
+            {
+                throw new DbConcurrencyException(e.Message);
+            }
+        }
     }
 }

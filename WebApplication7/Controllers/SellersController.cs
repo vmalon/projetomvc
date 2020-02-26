@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApplication7.Models;
 using WebApplication7.Models.ViewModels;
 using WebApplication7.Services;
+using WebApplication7.Services.Exceptions;
 
 namespace WebApplication7.Controllers
 {
@@ -23,7 +24,7 @@ namespace WebApplication7.Controllers
 
         public IActionResult Index()
         {
-            
+
             var list = _sellerService.FindAll();
 
             return View(list);
@@ -31,7 +32,7 @@ namespace WebApplication7.Controllers
 
         //Por padrão, criar GET
         //Altera POST
-        
+
         public IActionResult Create()
         {
             var departments = _departmentService.FindAll();
@@ -62,7 +63,7 @@ namespace WebApplication7.Controllers
 
             //Retorna a View Delete, passando o objeto obj como parâmetro
             return View(obj);
-           //id == null && obj == null ? NotFound() : View(obj);
+            //id == null && obj == null ? NotFound() : View(obj);
         }
 
         [HttpPost]
@@ -71,17 +72,22 @@ namespace WebApplication7.Controllers
         {
             _sellerService.Remove(id);
 
-             return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
-    
+
         [HttpGet]
-        public IActionResult Details (int? id)
+        public IActionResult Details(int? id)
         {
+            //Verifica se o id e o obj é nulo e retorna NotFound()
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             //obj recebe o id, retornado do método FindById, do serviço _sellerSerice
             var obj = _sellerService.FindById(id.Value);
 
-            //Verifica se o id e o obj é nulo e retorna NotFound()
-            if (id == null && obj == null)
+            if (obj == null)
             {
                 return NotFound();
             }
@@ -90,5 +96,57 @@ namespace WebApplication7.Controllers
             return View(obj);
             //id == null && obj == null ? NotFound() : View(obj);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Seller seller)
+        {
+            //Id a ser atualizado é diferente do Id da URL da requisição
+            if (id != seller.Id)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                _sellerService.Update(seller);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (DbConcurrencyException)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        //O id é obrigatório
+        //O opcionl é para previnir erros
+        public IActionResult Edit(int? id)
+        {
+            //Verifica se o id e o obj é nulo e retorna NotFound()
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sellerService.FindById(id.Value);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            List<Departments> departments = _departmentService.FindAll();
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
+
+            return View(viewModel);
+
+        }
+
     }
 }
