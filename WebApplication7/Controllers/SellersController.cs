@@ -73,6 +73,22 @@ namespace WebApplication7.Controllers
 
              return RedirectToAction(nameof(Index));
         }
+    
+        [HttpGet]
+        public IActionResult Details (int? id)
+        {
+            //obj recebe o id, retornado do método FindById, do serviço _sellerSerice
+            var obj = _sellerService.FindById(id.Value);
 
+            //Verifica se o id e o obj é nulo e retorna NotFound()
+            if (id == null && obj == null)
+            {
+                return NotFound();
+            }
+
+            //Retorna a View Delete, passando o objeto obj como parâmetro
+            return View(obj);
+            //id == null && obj == null ? NotFound() : View(obj);
+        }
     }
 }
