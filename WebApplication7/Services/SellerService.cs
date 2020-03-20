@@ -1,8 +1,8 @@
-﻿using System;
+﻿using WebApplication7.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApplication7.Models;
 using Microsoft.EntityFrameworkCore;
 using WebApplication7.Services.Exceptions;
 
@@ -10,10 +10,6 @@ namespace WebApplication7.Services
 {
     public class SellerService
     {
-        //Retorna uma lista com todos os vendedores
-
-        //Dependencia context
-        //ReadOnly, previne alterações
         private readonly WebApplication7Context _context;
 
         public SellerService(WebApplication7Context context)
@@ -21,52 +17,49 @@ namespace WebApplication7.Services
             _context = context;
         }
 
-
-        //Operação síncrona.
-        //A aplicação aguarda a operação terminar
-        //Assíncronas garante um melhor desempenho
-        public List<Seller> FindAll()
+        public async Task<List<Seller>> FindAllAsync()
         {
-            return _context.Seller.ToList();
+            return await _context.Seller.ToListAsync();
         }
 
-        public void Insert(Seller obj)
+        public async Task InsertAsync(Seller obj)
         {
             _context.Add(obj);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-
-        public Seller FindById(int id)
+        public async Task<Seller> FindByIdAsync(int id)
         {
-            //Join das duas tabelas com Entity Framework Core
-            return _context.Seller.Include(x => x.Department).FirstOrDefault(x => x.Id == id);
+            return await _context.Seller.Include(obj => obj.Department).FirstOrDefaultAsync(obj => obj.Id == id);
         }
 
-        public void Remove(int id)
+        public async Task RemoveAsync(int id)
         {
-            var obj = _context.Seller.Find(id);
-            _context.Remove(obj);
-            _context.SaveChanges();
-        }
-
-        public void Update(Seller obj)
-        {
-            //Any: se existe algum registro com a condição
-            //Se não existir um registro igual ao do objeto
-            if (!_context.Seller.Any(x => x.Id == obj.Id))
+            try
             {
-                throw new NotFoundException("Id não encontrado");
+                var obj = await _context.Seller.FindAsync(id);
+                _context.Seller.Remove(obj);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                throw new IntegrityException("Can't delete seller because he/she has sales");
+            }
+        }
+
+        public async Task UpdateAsync(Seller obj)
+        {
+            bool hasAny = await _context.Seller.AnyAsync(x => x.Id == obj.Id);
+            if (!hasAny)
+            {
+                throw new NotFoundException("Id not found");
             }
             try
             {
                 _context.Update(obj);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
-            //A camada de serviço lança a Exceção no seu nível
-            //Assim, o controller consegue reconhecer a exceção fora da sua camada
-            //Essas exceções de Serviço, são exceções de camada de nível de acesso a dados
-            catch (DbConcurrencyException e)
+            catch (DbUpdateConcurrencyException e)
             {
                 throw new DbConcurrencyException(e.Message);
             }

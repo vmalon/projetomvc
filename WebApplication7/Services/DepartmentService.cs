@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Linq;
 using WebApplication7.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication7.Services
 {
@@ -17,10 +17,11 @@ namespace WebApplication7.Services
         }
 
 
-        public List<Departments> FindAll()
+        public async Task<List<Departments>> FindAllAsync()
         {
             //Retorna a lista ordenada por nome
-            return _context.Departments.OrderBy(x => x.Nome).ToList();
+            //Await informa pro compilador que há um retorno de chamada assincrona
+            return await _context.Departments.OrderBy(x => x.Nome).ToListAsync();
         }
 
 

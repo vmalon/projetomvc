@@ -24,9 +24,9 @@ namespace WebApplication7.Models
         [Display(Name = "Salário")]
         [DisplayFormat(DataFormatString = "{0:F2}")]
         public double BaseSalary { get; set; }
+        public Departments Department { get; set; }
         [Required]
         [Display(Name = "Departamento")]
-        public Departments Department { get; set; }
         public int DepartmentId { get; set;}
         [Display(Name = "Vendas")]
         public ICollection<SalesRecord> Sales { get; set; } = new List<SalesRecord>();
